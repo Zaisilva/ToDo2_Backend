@@ -5,35 +5,36 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 router.post('/register', async (req, res) => {
-    try {
+  try {
       const { email, username, password } = req.body;
-  
+
       if (!email || !username || !password) {
-        return res.status(400).json({ error: "Todos los campos son obligatorios" });
+          return res.status(400).json({ error: "Todos los campos son obligatorios" });
       }
-  
+
       const userSnapshot = await db.collection('users')
-        .where('email', '==', email)
-        .get();
-  
+          .where('email', '==', email)
+          .get();
+
       if (!userSnapshot.empty) {
-        return res.status(400).json({ error: 'El usuario ya existe' });
+          return res.status(400).json({ error: 'El usuario ya existe' });
       }
-  
+
       const hashedPassword = await bcrypt.hash(password, 10);
       await db.collection('users').add({
-        email,
-        username,
-        password: hashedPassword,
-        last_login: new Date()
+          email,
+          username,
+          password: hashedPassword,
+          tipo: 2, // Se asigna el tipo 2 automáticamente
+          last_login: new Date()
       });
-  
+
       res.status(201).json({ message: 'Usuario registrado exitosamente' });
-    } catch (error) {
+  } catch (error) {
       res.status(500).json({ error: error.message });
-    }
-  });
-  
+  }
+});
+
 
 router.post('/login', async (req, res) => {
   try {
@@ -65,9 +66,18 @@ router.post('/login', async (req, res) => {
       { expiresIn: '10m' }
     );
 
-    res.json({ token, user: { email: userData.email, username: userData.username } });
+    // Aquí agregamos `tipo` a la respuesta
+    res.json({ 
+      token, 
+      user: { 
+        email: userData.email, 
+        username: userData.username, 
+        tipo: userData.tipo  // <- Asegúrate de que existe en Firestore
+      } 
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
+
 module.exports = router;
