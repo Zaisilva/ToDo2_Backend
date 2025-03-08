@@ -35,7 +35,6 @@ router.post('/register', async (req, res) => {
   }
 });
 
-
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -66,18 +65,26 @@ router.post('/login', async (req, res) => {
       { expiresIn: '10m' }
     );
 
-    // Aquí agregamos `tipo` a la respuesta
     res.json({ 
       token, 
       user: { 
+        id: userId, 
         email: userData.email, 
         username: userData.username, 
-        tipo: userData.tipo  // <- Asegúrate de que existe en Firestore
+        tipo: userData.tipo  
       } 
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
+router.post('/logout', (req, res) => {
+  try {
+    res.json({ message: 'Sesión cerrada exitosamente' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 
 module.exports = router;

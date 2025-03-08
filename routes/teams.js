@@ -155,11 +155,15 @@ router.delete('/:id', authenticateToken, async (req, res) => {
     if (!teamDoc.exists) {
       return res.status(404).json({ error: 'Team not found' });
     }
+    
     const teamData = teamDoc.data();
+    
     if (teamData.createdBy !== userId) {
       return res.status(403).json({ error: 'You are not authorized to delete this team' });
-    }  
+    }
+    
     await db.collection('teams').doc(teamId).delete();
+    
     res.status(200).json({ message: 'Team deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -173,6 +177,7 @@ router.get('/users/search', authenticateToken, async (req, res) => {
     if (!searchQuery || searchQuery.length < 2) {
       return res.status(400).json({ error: 'Search query must be at least 2 characters' });
     }
+
     const usersRef = db.collection('users');
     const nameSnapshot = await usersRef
       .where('name', '>=', searchQuery)
@@ -215,13 +220,13 @@ router.get('/users/search', authenticateToken, async (req, res) => {
         });
       }
     });
+    
     res.status(200).json(users);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// Get members of a specific team
 router.get('/:id/members', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.userId;
