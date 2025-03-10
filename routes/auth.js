@@ -25,7 +25,7 @@ router.post('/register', async (req, res) => {
           email,
           username,
           password: hashedPassword,
-          tipo: 2, // Se asigna el tipo 2 automáticamente
+          tipo: 2, 
           last_login: new Date()
       });
 
